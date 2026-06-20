@@ -1,0 +1,23 @@
+{
+    "name": "akapack/whatsapp-bot",
+    "description": "Bot auto-reply WhatsApp AI untuk AKAPACK (async: receiver -> queue -> worker -> Claude -> Supabase tools).",
+    "type": "project",
+    "require": {
+        "php": ">=8.2",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "predis/predis": "^2.2"
+    },
+    "require-dev": {
+        "ext-pcntl": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Akapack\\Bot\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
