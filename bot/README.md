@@ -23,7 +23,7 @@ WhatsApp Cloud API (webhook)
 | **0** | Echo-bot + queue async **at-least-once** (receiver, worker, debounce, dedup idempotent, retry, eskalasi, mode HUMAN) | ✅ selesai |
 | **1** | `ClaudeHandler` — FAQ via Claude API (SDK resmi, adaptive thinking, effort medium, prompt caching, anti-refusal) | ✅ selesai |
 | **2** | `ClaudeToolHandler` — tools function-call Supabase (cari_produk/cek_stok/cek_harga/daftar_kategori) + guardrail cost_price | ✅ selesai |
-| 3 | Eskalasi admin per-cabang + memori percakapan (sliding-window) | ⏭️ berikutnya |
+| **3** | Memori percakapan (sliding-window, Supabase `wa_messages`) + `eskalasi_ke_admin` per-cabang (intent+ringkasan+riwayat) | ✅ selesai |
 
 Handler dipilih otomatis di `src/Bot.php`:
 - **ClaudeToolHandler** (Fase 2) bila `ANTHROPIC_API_KEY` **dan** `SUPABASE_URL`/`SUPABASE_ANON_KEY` terisi → bot bisa jawab produk/stok/harga real-time.
@@ -143,6 +143,22 @@ php tools/test_supabase.php
 Bagian unit memakai DB palsu (tier harga, mapping cabang, guardrail cost_price).
 Bagian LIVE konek anon key dari `~/Documents/akapack/.env.local` dan menguji
 `cari_produk/cek_stok/cek_harga/daftar_kategori` + memastikan `cost_price` tak bocor.
+
+Uji Fase 3 (memori + eskalasi) tanpa kredensial:
+
+```bash
+php tools/test_memory.php
+```
+
+Memverifikasi memori sliding-window, riwayat diumpan ke LLM, eskalasi per-cabang
+(intent+ringkasan+riwayat ke admin yang tepat), dan tool `eskalasi_ke_admin`.
+
+### Mengaktifkan memori percakapan (Supabase)
+
+Jalankan SEKALI di **Supabase SQL Editor**: isi `sql/wa_messages.sql`
+(buat tabel `wa_messages` + index). Bot **degrade dengan aman** bila tabel belum
+ada — balasan tetap jalan, hanya tanpa memori. Isi juga `ADMIN_WA_BANDUNG` /
+`ADMIN_WA_GARUT` di `.env` supaya handoff dikirim ke admin cabang yang tepat.
 
 ## Keandalan (at-least-once)
 
