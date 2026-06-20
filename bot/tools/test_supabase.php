@@ -13,13 +13,10 @@ if (PHP_SAPI !== 'cli') {
     exit("CLI only\n");
 }
 
-use Akapack\Bot\Handler\ClaudeToolHandler;
 use Akapack\Bot\Logger;
 use Akapack\Bot\Supabase\Db;
 use Akapack\Bot\Supabase\SupabaseClient;
 use Akapack\Bot\Supabase\SupabaseTools;
-use Akapack\Bot\Tool\ToolExecutor;
-use Akapack\Bot\Tool\ToolRunner;
 
 $base = dirname(__DIR__);
 putenv('DATA_DIR=' . $base . '/var/test_supa');
@@ -96,24 +93,7 @@ try {
     $threw = true;
 }
 report($fails, 'select cost_price → ditolak guardrail (sebelum jaringan)', $threw);
-
-echo "\n== ClaudeToolHandler (fake runner) ==\n";
-$fakeRunner = new class implements ToolRunner {
-    public array $next = ['text' => '', 'refused' => false];
-    public int $toolCount = 0;
-    public function run(string $system, array $messages, array $tools, ToolExecutor $executor): array
-    {
-        $this->toolCount = count($tools);
-        return $this->next;
-    }
-};
-$h = new ClaudeToolHandler($fakeRunner, 'SYS', SupabaseTools::definitions(), $tools);
-$fakeRunner->next = ['text' => 'Stok Plastik PE di Bandung 5 pack kak 👍', 'refused' => false];
-report($fails, 'handler passthrough', $h->handle('628', 'stok plastik?') === 'Stok Plastik PE di Bandung 5 pack kak 👍');
-report($fails, '4 tool diteruskan', $fakeRunner->toolCount === 4);
-$fakeRunner->next = ['text' => '', 'refused' => true];
-report($fails, 'refusal → fallback admin', str_contains($h->handle('628', 'x') ?? '', 'admin'));
-report($fails, 'input kosong → null', $h->handle('628', '  ') === null);
+// (ClaudeToolHandler + memori + eskalasi diuji di tools/test_memory.php)
 
 // ---------- LIVE ----------
 [$liveUrl, $liveKey] = loadEnvLocal();

@@ -16,6 +16,7 @@ if (PHP_SAPI !== 'cli') {
 
 use Akapack\Bot\Handler\ClaudeHandler;
 use Akapack\Bot\Llm\LlmClient;
+use Akapack\Bot\Memory\NullMemory;
 use Akapack\Bot\SystemPrompt;
 use Akapack\Bot\Worker;
 
@@ -54,7 +55,7 @@ report($fails, 'System prompt memuat persona', str_contains($sys, 'Mbak Aka'));
 report($fails, 'System prompt memuat guardrail harga', str_contains(strtolower($sys), 'jangan menjanjikan harga'));
 
 echo "\n== ClaudeHandler (unit) ==\n";
-$handler = new ClaudeHandler($fake, $sys);
+$handler = new ClaudeHandler($fake, $sys, new NullMemory());
 
 $fake->next = ['text' => 'Halo kak! Kami jual aneka kemasan plastik 😊', 'refused' => false];
 $out = $handler->handle('628111', 'jual plastik apa aja?');
@@ -74,7 +75,7 @@ report($fails, 'Input kosong -> null (tidak panggil LLM)', $handler->handle('628
 
 echo "\n== Integrasi via Worker ==\n";
 $fake->next = ['text' => 'Cabang Bandung di Jl. Ibrahim Adjie, Kiaracondong kak 📍', 'refused' => false];
-$worker = new Worker($bot->config, $bot->store, $bot->whatsapp, new ClaudeHandler($fake, $sys), $bot->logger);
+$worker = new Worker($bot->config, $bot->store, $bot->whatsapp, new ClaudeHandler($fake, $sys, new NullMemory()), $bot->logger, $bot->escalator);
 
 $bot->receiver()->handlePost(payload('628999', 'c1', 'alamat cabang bandung dimana?'), null);
 $n = $worker->runOnce(true);
