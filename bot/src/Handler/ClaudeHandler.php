@@ -5,19 +5,21 @@ declare(strict_types=1);
 namespace Akapack\Bot\Handler;
 
 use Akapack\Bot\Llm\LlmClient;
+use Akapack\Bot\Memory\ConversationMemory;
 
 /**
- * Handler Fase 1: balas FAQ via Claude. Di Fase 2 ditambah tools Supabase.
+ * Handler Fase 1: balas FAQ via Claude, dengan memori percakapan (sliding-window).
  *
  * Catatan: error API (rate limit/overload/jaringan) dibiarkan melempar exception
- * agar Worker menjadwalkan ulang (retry). Refusal classifier -> balasan aman
- * yang mengarahkan ke admin (bukan exception).
+ * agar Worker menjadwalkan ulang (retry). Refusal classifier -> balasan aman.
  */
 final class ClaudeHandler implements Handler
 {
     public function __construct(
         private readonly LlmClient $llm,
         private readonly string $systemPrompt,
+        private readonly ConversationMemory $memory,
+        private readonly int $historyTurns = 12,
     ) {
     }
 
@@ -27,15 +29,17 @@ final class ClaudeHandler implements Handler
             return null;
         }
 
-        $res = $this->llm->reply($this->systemPrompt, [
-            ['role' => 'user', 'content' => $text],
-        ]);
+        $history = $this->memory->recent($waId, $this->historyTurns);
+        $messages = array_merge($history, [['role' => 'user', 'content' => $text]]);
 
-        if ($res['refused'] || trim($res['text']) === '') {
-            return "Maaf kak, untuk yang ini aku sambungkan ke admin ya 🙏 "
-                . "Ketik *admin* untuk terhubung langsung dengan tim kami.";
-        }
+        $res = $this->llm->reply($this->systemPrompt, $messages);
 
-        return $res['text'];
+        $reply = ($res['refused'] || trim($res['text']) === '')
+            ? "Maaf kak, untuk yang ini aku sambungkan ke admin ya 🙏 Ketik *admin* untuk terhubung langsung dengan tim kami."
+            : $res['text'];
+
+        $this->memory->append($waId, 'user', $text);
+        $this->memory->append($waId, 'assistant', $reply);
+        return $reply;
     }
 }

@@ -4,21 +4,33 @@ declare(strict_types=1);
 
 namespace Akapack\Bot\Handler;
 
-use Akapack\Bot\Tool\ToolExecutor;
+use Akapack\Bot\Escalator;
+use Akapack\Bot\Memory\ConversationMemory;
+use Akapack\Bot\Supabase\SupabaseTools;
+use Akapack\Bot\Tool\RequestTools;
 use Akapack\Bot\Tool\ToolRunner;
 
 /**
- * Handler Fase 2: Claude + tools Supabase (produk/stok/harga/kategori real-time).
- * Model memutuskan kapan memanggil tool; eksekusi query ada di ToolExecutor.
+ * Handler Fase 2/3: Claude + tools Supabase (produk/stok/harga/kategori) +
+ * eskalasi_ke_admin, dengan memori percakapan (sliding-window).
  */
 final class ClaudeToolHandler implements Handler
 {
+    /** @var array<int,array<string,mixed>> */
+    private readonly array $tools;
+
     public function __construct(
         private readonly ToolRunner $llm,
         private readonly string $systemPrompt,
-        private readonly array $tools,
-        private readonly ToolExecutor $executor,
+        private readonly SupabaseTools $supabase,
+        private readonly Escalator $escalator,
+        private readonly ConversationMemory $memory,
+        private readonly int $historyTurns = 12,
     ) {
+        $this->tools = array_merge(
+            SupabaseTools::definitions(),
+            [RequestTools::escalationDefinition()],
+        );
     }
 
     public function handle(string $waId, string $text): ?string
@@ -27,18 +39,18 @@ final class ClaudeToolHandler implements Handler
             return null;
         }
 
-        $res = $this->llm->run(
-            $this->systemPrompt,
-            [['role' => 'user', 'content' => $text]],
-            $this->tools,
-            $this->executor,
-        );
+        $history = $this->memory->recent($waId, $this->historyTurns);
+        $messages = array_merge($history, [['role' => 'user', 'content' => $text]]);
 
-        if ($res['refused'] || trim($res['text']) === '') {
-            return "Maaf kak, untuk yang ini aku sambungkan ke admin ya 🙏 "
-                . "Ketik *admin* untuk terhubung langsung dengan tim kami.";
-        }
+        $executor = new RequestTools($waId, $this->supabase, $this->escalator);
+        $res = $this->llm->run($this->systemPrompt, $messages, $this->tools, $executor);
 
-        return $res['text'];
+        $reply = ($res['refused'] || trim($res['text']) === '')
+            ? "Maaf kak, untuk yang ini aku sambungkan ke admin ya 🙏 Ketik *admin* untuk terhubung langsung."
+            : $res['text'];
+
+        $this->memory->append($waId, 'user', $text);
+        $this->memory->append($waId, 'assistant', $reply);
+        return $reply;
     }
 }
