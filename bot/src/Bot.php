@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Akapack\Bot;
 
 use Akapack\Bot\Handler\ClaudeHandler;
+use Akapack\Bot\Handler\ClaudeToolHandler;
 use Akapack\Bot\Handler\EchoHandler;
 use Akapack\Bot\Handler\Handler;
 use Akapack\Bot\Llm\AnthropicClient;
 use Akapack\Bot\Store\FileStore;
 use Akapack\Bot\Store\RedisStore;
 use Akapack\Bot\Store\Store;
+use Akapack\Bot\Supabase\SupabaseClient;
+use Akapack\Bot\Supabase\SupabaseTools;
 
 /**
  * Perakitan (composition root). Membaca konfigurasi & menyusun komponen.
@@ -49,19 +52,34 @@ final class Bot
     }
 
     /**
-     * Fase 1: ClaudeHandler bila ANTHROPIC_API_KEY terisi (dan SDK tersedia);
-     * jika tidak, fallback ke EchoHandler (mis. dev tanpa kredensial).
+     * Pemilihan handler bertahap:
+     *  - Claude + Supabase terisi → ClaudeToolHandler (Fase 2, tools real-time)
+     *  - Claude saja              → ClaudeHandler (Fase 1, FAQ)
+     *  - tidak ada                → EchoHandler (Fase 0, dev)
      */
     private function buildHandler(): Handler
     {
-        if ($this->config->anthropicApiKey !== '' && class_exists(\Anthropic\Client::class)) {
-            $llm = new AnthropicClient($this->config->anthropicApiKey, $this->config->claudeModel);
-            $system = SystemPrompt::faq($this->config->botName, $this->config->companyName);
-            return new ClaudeHandler($llm, $system);
+        $claudeReady = $this->config->anthropicApiKey !== '' && class_exists(\Anthropic\Client::class);
+        if (!$claudeReady) {
+            $this->logger->warn('ANTHROPIC_API_KEY kosong / SDK absen — pakai EchoHandler (Fase 0)');
+            return new EchoHandler($this->config->botName);
         }
 
-        $this->logger->warn('ANTHROPIC_API_KEY kosong / SDK absen — pakai EchoHandler (Fase 0)');
-        return new EchoHandler($this->config->botName);
+        $llm = new AnthropicClient($this->config->anthropicApiKey, $this->config->claudeModel);
+
+        if ($this->config->supabaseUrl !== '' && $this->config->supabaseAnonKey !== '') {
+            $db = new SupabaseClient($this->config->supabaseUrl, $this->config->supabaseAnonKey, $this->logger);
+            $tools = new SupabaseTools($db, $this->config->tenantId, $this->config->outletBandung, $this->config->outletGarut);
+            return new ClaudeToolHandler(
+                $llm,
+                SystemPrompt::withTools($this->config->botName, $this->config->companyName),
+                SupabaseTools::definitions(),
+                $tools,
+            );
+        }
+
+        $this->logger->info('Supabase belum dikonfigurasi — pakai ClaudeHandler FAQ (Fase 1)');
+        return new ClaudeHandler($llm, SystemPrompt::faq($this->config->botName, $this->config->companyName));
     }
 
     public function receiver(): Receiver
