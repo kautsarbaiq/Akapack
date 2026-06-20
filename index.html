@@ -1,1081 +1,346 @@
-<!DOCTYPE html>
-<html lang="id">
+<!doctype html>
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akapack - Solusi Kemasan Custom untuk UKM Indonesia</title>
-    <meta name="description" content="Akapack menyediakan kemasan custom berkualitas tinggi untuk UKM Indonesia. Dapatkan kemasan standing pouch, sachet, dan ziplock dengan harga terjangkau.">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Akapack — Quality Packaging & Printing Solutions</title>
+    <meta name="description"
+        content="Akapack provides high–quality packaging and printing solutions: standing pouch, sachet, ziplock, custom orders for SMEs and brands." />
+    <meta name="theme-color" content="#f97316" />
+
+    <!-- Tailwind CSS via CDN (no build step) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        /* Tailwind runtime config: brand colors */
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'akapack-orange': '#FF6B35',
-                        'akapack-orange-light': '#FF8A65',
-                        'akapack-orange-dark': '#E55722',
+                        brand: {
+                            DEFAULT: '#f97316', // orange-500
+                            dark: '#ea580c',     // orange-600
+                            light: '#fdba74'     // orange-300
+                        }
                     }
                 }
             }
         }
     </script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-white">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+
+<body class="antialiased text-slate-700 bg-white">
+    <!-- Header / Navigation -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <div class="text-2xl font-bold text-akapack-orange">Akapack</div>
-                </div>
-                
-                <!-- Desktop Menu -->
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#home" class="text-gray-700 hover:text-akapack-orange px-3 py-2 rounded-md text-sm font-medium">Beranda</a>
-                        <a href="#products" class="text-gray-700 hover:text-akapack-orange px-3 py-2 rounded-md text-sm font-medium">Produk</a>
-                        <a href="#gallery" class="text-gray-700 hover:text-akapack-orange px-3 py-2 rounded-md text-sm font-medium">Galeri</a>
-                        <a href="#news" class="text-gray-700 hover:text-akapack-orange px-3 py-2 rounded-md text-sm font-medium">Berita</a>
-                        <a href="#contact" class="text-gray-700 hover:text-akapack-orange px-3 py-2 rounded-md text-sm font-medium">Kontak</a>
-                        <button onclick="openOrderForm()" class="bg-akapack-orange text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-akapack-orange-dark">Pesan Sekarang</button>
-                    </div>
-                </div>
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand -->
+                <a href="#home" class="flex items-center gap-2">
+                    <span
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-brand text-white font-bold">A</span>
+                    <span class="text-lg font-semibold tracking-wide text-slate-900">Akapack</span>
+                </a>
 
-                <!-- Mobile menu button -->
-                <div class="md:hidden">
-                    <button onclick="toggleMobileMenu()" class="text-gray-700 hover:text-akapack-orange">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                </div>
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+                    <a href="#home" class="hover:text-brand transition-colors">Home</a>
+                    <a href="#products" class="hover:text-brand transition-colors">Products</a>
+                    <a href="#printing" class="hover:text-brand transition-colors">Printing Services</a>
+                    <a href="#about" class="hover:text-brand transition-colors">About Us</a>
+                    <a href="#contact" class="hover:text-brand transition-colors">Contact</a>
+                    <a href="#contact"
+                        class="ml-3 inline-flex items-center rounded-md bg-brand px-4 py-2 text-white hover:bg-brand-dark transition-colors">Get
+                        a Quote</a>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" aria-label="Toggle menu"
+                    class="md:hidden inline-flex items-center justify-center rounded-md p-2 text-slate-600 hover:text-brand hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
             </div>
         </div>
 
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#home" class="text-gray-700 hover:text-akapack-orange block px-3 py-2 rounded-md text-base font-medium">Beranda</a>
-                <a href="#products" class="text-gray-700 hover:text-akapack-orange block px-3 py-2 rounded-md text-base font-medium">Produk</a>
-                <a href="#gallery" class="text-gray-700 hover:text-akapack-orange block px-3 py-2 rounded-md text-base font-medium">Galeri</a>
-                <a href="#news" class="text-gray-700 hover:text-akapack-orange block px-3 py-2 rounded-md text-base font-medium">Berita</a>
-                <a href="#contact" class="text-gray-700 hover:text-akapack-orange block px-3 py-2 rounded-md text-base font-medium">Kontak</a>
-                <button onclick="openOrderForm()" class="w-full text-left bg-akapack-orange text-white px-3 py-2 rounded-md text-base font-medium hover:bg-akapack-orange-dark">Pesan Sekarang</button>
+        <!-- Mobile Nav -->
+        <nav id="mobile-menu" class="md:hidden hidden border-t border-slate-100 bg-white">
+            <div class="px-4 py-3 space-y-2 text-sm">
+                <a href="#home" class="block px-3 py-2 rounded hover:bg-slate-50">Home</a>
+                <a href="#products" class="block px-3 py-2 rounded hover:bg-slate-50">Products</a>
+                <a href="#printing" class="block px-3 py-2 rounded hover:bg-slate-50">Printing Services</a>
+                <a href="#about" class="block px-3 py-2 rounded hover:bg-slate-50">About Us</a>
+                <a href="#contact" class="block px-3 py-2 rounded hover:bg-slate-50">Contact</a>
+                <a href="#contact"
+                    class="block px-3 py-2 rounded bg-brand text-white text-center hover:bg-brand-dark">Get a Quote</a>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
-    <!-- Hero Section with Rotating Banner -->
-    <section id="home" class="pt-16 bg-gradient-to-r from-orange-50 to-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div class="text-center">
-                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                    Kemasan Custom <span class="text-akapack-orange">Berkualitas</span><br>
-                    untuk UKM Indonesia
-                </h1>
-                <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                    Tingkatkan brand Anda dengan kemasan custom yang menarik dan berkualitas tinggi. 
-                    Mulai dari 100 pcs dengan harga terjangkau untuk semua jenis UKM.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button onclick="openOrderForm()" class="bg-akapack-orange text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-akapack-orange-dark transform hover:scale-105 transition-all">
-                        Pesan Custom Sekarang
-                    </button>
-                    <a href="#products" class="border-2 border-akapack-orange text-akapack-orange px-8 py-4 rounded-lg text-lg font-semibold hover:bg-akapack-orange hover:text-white transition-all">
-                        Lihat Katalog
-                    </a>
-                </div>
+    <!-- Hero Section -->
+    <section id="home" class="relative">
+        <div class="relative h-[70vh] min-h-[500px] w-full overflow-hidden">
+            <div
+                class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1960&auto=format&fit=crop')] bg-cover bg-center">
             </div>
+            <div class="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/40 to-black/20"></div>
 
-            <!-- Rotating Banner -->
-            <div class="mt-16 relative">
-                <div id="banner-container" class="overflow-hidden rounded-lg shadow-2xl">
-                    <div id="banner-slider" class="flex transition-transform duration-500 ease-in-out">
-                        <div class="w-full flex-shrink-0">
-                            <img src="/placeholder.svg?height=400&width=800" alt="Kemasan Standing Pouch" class="w-full h-64 md:h-96 object-cover">
-                        </div>
-                        <div class="w-full flex-shrink-0">
-                            <img src="/placeholder.svg?height=400&width=800" alt="Kemasan Sachet dan Ziplock" class="w-full h-64 md:h-96 object-cover">
-                        </div>
-                        <div class="w-full flex-shrink-0">
-                            <img src="/placeholder.svg?height=400&width=800" alt="Kemasan Custom Brand" class="w-full h-64 md:h-96 object-cover">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Banner Navigation -->
-                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                    <button onclick="goToSlide(0)" class="banner-dot w-3 h-3 rounded-full bg-white opacity-50 hover:opacity-100"></button>
-                    <button onclick="goToSlide(1)" class="banner-dot w-3 h-3 rounded-full bg-white opacity-50 hover:opacity-100"></button>
-                    <button onclick="goToSlide(2)" class="banner-dot w-3 h-3 rounded-full bg-white opacity-50 hover:opacity-100"></button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Why Akapack Section -->
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Mengapa Pilih Akapack?</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Kami memahami kebutuhan UKM Indonesia dan berkomitmen memberikan solusi kemasan terbaik
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="text-center p-6 rounded-lg hover:shadow-lg transition-shadow">
-                    <div class="w-16 h-16 bg-akapack-orange rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-dollar-sign text-white text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3">Harga Terjangkau</h3>
-                    <p class="text-gray-600">Mulai dari 100 pcs dengan harga yang ramah untuk kantong UKM. Tidak ada minimum order yang memberatkan.</p>
-                </div>
-
-                <div class="text-center p-6 rounded-lg hover:shadow-lg transition-shadow">
-                    <div class="w-16 h-16 bg-akapack-orange rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-palette text-white text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3">Design Custom</h3>
-                    <p class="text-gray-600">Tim desainer berpengalaman siap membantu mewujudkan kemasan impian Anda sesuai brand identity.</p>
-                </div>
-
-                <div class="text-center p-6 rounded-lg hover:shadow-lg transition-shadow">
-                    <div class="w-16 h-16 bg-akapack-orange rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-shipping-fast text-white text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3">Pengiriman Cepat</h3>
-                    <p class="text-gray-600">Proses produksi 7-14 hari kerja dengan pengiriman ke seluruh Indonesia via ekspedisi terpercaya.</p>
-                </div>
-            </div>
-
-            <!-- Testimonials -->
-            <div class="mt-20">
-                <h3 class="text-2xl font-bold text-center mb-12">Apa Kata Klien Kami?</h3>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="bg-gray-50 p-6 rounded-lg">
-                        <div class="flex items-center mb-4">
-                            <img src="/placeholder.svg?height=50&width=50" alt="Testimoni" class="w-12 h-12 rounded-full mr-4">
-                            <div>
-                                <h4 class="font-semibold">Sari Dewi</h4>
-                                <p class="text-sm text-gray-600">Owner Keripik Sari</p>
-                            </div>
-                        </div>
-                        <p class="text-gray-700">"Kemasan dari Akapack bikin produk keripik saya terlihat premium! Penjualan naik 40% setelah ganti kemasan."</p>
-                        <div class="flex text-yellow-400 mt-2">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 p-6 rounded-lg">
-                        <div class="flex items-center mb-4">
-                            <img src="/placeholder.svg?height=50&width=50" alt="Testimoni" class="w-12 h-12 rounded-full mr-4">
-                            <div>
-                                <h4 class="font-semibold">Budi Santoso</h4>
-                                <p class="text-sm text-gray-600">Owner Kopi Budi</p>
-                            </div>
-                        </div>
-                        <p class="text-gray-700">"Pelayanan sangat memuaskan, design sesuai keinginan, dan harga bersahabat. Recommended banget untuk UKM!"</p>
-                        <div class="flex text-yellow-400 mt-2">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 p-6 rounded-lg">
-                        <div class="flex items-center mb-4">
-                            <img src="/placeholder.svg?height=50&width=50" alt="Testimoni" class="w-12 h-12 rounded-full mr-4">
-                            <div>
-                                <h4 class="font-semibold">Maya Putri</h4>
-                                <p class="text-sm text-gray-600">Owner Snack Maya</p>
-                            </div>
-                        </div>
-                        <p class="text-gray-700">"Dari order pertama langsung cocok! Kemasan standing pouch-nya berkualitas dan tahan lama. Pelanggan jadi lebih percaya."</p>
-                        <div class="flex text-yellow-400 mt-2">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Products Section -->
-    <section id="products" class="py-20 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Katalog Produk Kemasan</h2>
-                <p class="text-xl text-gray-600">Pilihan lengkap kemasan custom untuk berbagai kebutuhan UKM Anda</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Standing Pouch -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=250&width=400" alt="Standing Pouch" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">Standing Pouch</h3>
-                        <p class="text-gray-600 mb-4">Kemasan berdiri yang elegan, cocok untuk snack, kopi, teh, dan produk kering lainnya.</p>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Ukuran tersedia:</p>
-                            <p class="font-medium">10x15cm, 12x20cm, 15x22cm, 18x26cm</p>
-                        </div>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Harga mulai:</p>
-                            <p class="text-2xl font-bold text-akapack-orange">Rp 850/pcs</p>
-                            <p class="text-sm text-gray-500">Min. order 100 pcs</p>
-                        </div>
-                        <button onclick="openOrderForm('Standing Pouch')" class="w-full bg-akapack-orange text-white py-2 rounded-lg hover:bg-akapack-orange-dark transition-colors">
-                            Pesan Sekarang
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Sachet -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=250&width=400" alt="Sachet" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">Sachet</h3>
-                        <p class="text-gray-600 mb-4">Kemasan praktis untuk produk bubuk, minuman instan, bumbu, dan produk cair.</p>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Ukuran tersedia:</p>
-                            <p class="font-medium">5x8cm, 6x10cm, 8x12cm, 10x15cm</p>
-                        </div>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Harga mulai:</p>
-                            <p class="text-2xl font-bold text-akapack-orange">Rp 450/pcs</p>
-                            <p class="text-sm text-gray-500">Min. order 100 pcs</p>
-                        </div>
-                        <button onclick="openOrderForm('Sachet')" class="w-full bg-akapack-orange text-white py-2 rounded-lg hover:bg-akapack-orange-dark transition-colors">
-                            Pesan Sekarang
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Ziplock -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=250&width=400" alt="Ziplock" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">Ziplock</h3>
-                        <p class="text-gray-600 mb-4">Kemasan dengan penutup resleting, menjaga kesegaran produk lebih lama.</p>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Ukuran tersedia:</p>
-                            <p class="font-medium">8x12cm, 10x15cm, 12x18cm, 15x22cm</p>
-                        </div>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Harga mulai:</p>
-                            <p class="text-2xl font-bold text-akapack-orange">Rp 650/pcs</p>
-                            <p class="text-sm text-gray-500">Min. order 100 pcs</p>
-                        </div>
-                        <button onclick="openOrderForm('Ziplock')" class="w-full bg-akapack-orange text-white py-2 rounded-lg hover:bg-akapack-orange-dark transition-colors">
-                            Pesan Sekarang
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Flat Bottom -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=250&width=400" alt="Flat Bottom" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">Flat Bottom</h3>
-                        <p class="text-gray-600 mb-4">Kemasan premium dengan dasar rata, memberikan kesan mewah dan stabil.</p>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Ukuran tersedia:</p>
-                            <p class="font-medium">12x20cm, 15x22cm, 18x26cm, 20x30cm</p>
-                        </div>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Harga mulai:</p>
-                            <p class="text-2xl font-bold text-akapack-orange">Rp 1.200/pcs</p>
-                            <p class="text-sm text-gray-500">Min. order 100 pcs</p>
-                        </div>
-                        <button onclick="openOrderForm('Flat Bottom')" class="w-full bg-akapack-orange text-white py-2 rounded-lg hover:bg-akapack-orange-dark transition-colors">
-                            Pesan Sekarang
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Side Gusset -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=250&width=400" alt="Side Gusset" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">Side Gusset</h3>
-                        <p class="text-gray-600 mb-4">Kemasan dengan lipatan samping, cocok untuk kopi, teh, dan produk premium.</p>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Ukuran tersedia:</p>
-                            <p class="font-medium">10x15cm, 12x20cm, 15x25cm, 18x28cm</p>
-                        </div>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Harga mulai:</p>
-                            <p class="text-2xl font-bold text-akapack-orange">Rp 950/pcs</p>
-                            <p class="text-sm text-gray-500">Min. order 100 pcs</p>
-                        </div>
-                        <button onclick="openOrderForm('Side Gusset')" class="w-full bg-akapack-orange text-white py-2 rounded-lg hover:bg-akapack-orange-dark transition-colors">
-                            Pesan Sekarang
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Custom Shape -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=250&width=400" alt="Custom Shape" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <h3 class="text-xl font-semibold mb-2">Custom Shape</h3>
-                        <p class="text-gray-600 mb-4">Kemasan dengan bentuk khusus sesuai kebutuhan dan kreativitas brand Anda.</p>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Ukuran:</p>
-                            <p class="font-medium">Sesuai permintaan</p>
-                        </div>
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500">Harga mulai:</p>
-                            <p class="text-2xl font-bold text-akapack-orange">Konsultasi</p>
-                            <p class="text-sm text-gray-500">Min. order 500 pcs</p>
-                        </div>
-                        <button onclick="openOrderForm('Custom Shape')" class="w-full bg-akapack-orange text-white py-2 rounded-lg hover:bg-akapack-orange-dark transition-colors">
-                            Konsultasi
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Bagaimana Cara Kerjanya?</h2>
-                <p class="text-xl text-gray-600">Proses mudah dari konsultasi hingga kemasan sampai di tangan Anda</p>
-            </div>
-
-            <div class="grid md:grid-cols-4 gap-8">
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-akapack-orange rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-white text-2xl font-bold">1</span>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Konsultasi</h3>
-                    <p class="text-gray-600">Hubungi kami via WhatsApp untuk konsultasi gratis tentang kebutuhan kemasan Anda</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-akapack-orange rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-white text-2xl font-bold">2</span>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Design</h3>
-                    <p class="text-gray-600">Tim desainer kami akan membuat mockup design sesuai brand identity Anda</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-akapack-orange rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-white text-2xl font-bold">3</span>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Produksi</h3>
-                    <p class="text-gray-600">Setelah approve, kami mulai produksi dengan quality control ketat</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-akapack-orange rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-white text-2xl font-bold">4</span>
-                    </div>
-                    <h3 class="text-lg font-semibold mb-2">Pengiriman</h3>
-                    <p class="text-gray-600">Kemasan siap dikirim ke alamat Anda dengan packaging aman</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Gallery Section -->
-    <section id="gallery" class="py-20 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Galeri Karya Kami</h2>
-                <p class="text-xl text-gray-600">Lihat berbagai project kemasan custom yang telah kami kerjakan</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=300&width=400" alt="Project 1" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300">
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                        <div class="text-white text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <h3 class="text-lg font-semibold">Kopi Premium</h3>
-                            <p class="text-sm">Standing Pouch Custom</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=300&width=400" alt="Project 2" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300">
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                        <div class="text-white text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <h3 class="text-lg font-semibold">Keripik Singkong</h3>
-                            <p class="text-sm">Ziplock Custom</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=300&width=400" alt="Project 3" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300">
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                        <div class="text-white text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <h3 class="text-lg font-semibold">Teh Herbal</h3>
-                            <p class="text-sm">Side Gusset Custom</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=300&width=400" alt="Project 4" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300">
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                        <div class="text-white text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <h3 class="text-lg font-semibold">Bumbu Tradisional</h3>
-                            <p class="text-sm">Sachet Custom</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=300&width=400" alt="Project 5" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300">
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                        <div class="text-white text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <h3 class="text-lg font-semibold">Coklat Premium</h3>
-                            <p class="text-sm">Flat Bottom Custom</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=300&width=400" alt="Project 6" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300">
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                        <div class="text-white text-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <h3 class="text-lg font-semibold">Buah Kering</h3>
-                            <p class="text-sm">Window Pouch Custom</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- News/Blog Section -->
-    <section id="news" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Berita & Tips UKM</h2>
-                <p class="text-xl text-gray-600">Update terbaru dan tips sukses untuk mengembangkan bisnis UKM Anda</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <article class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=200&width=400" alt="Artikel 1" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <div class="text-sm text-akapack-orange mb-2">Tips Kemasan</div>
-                        <h3 class="text-xl font-semibold mb-3">5 Tren Desain Kemasan 2024 yang Wajib UKM Ketahui</h3>
-                        <p class="text-gray-600 mb-4">Pelajari tren desain kemasan terbaru yang dapat meningkatkan daya tarik produk UKM Anda di pasaran...</p>
-                        <div class="flex items-center text-sm text-gray-500">
-                            <i class="far fa-calendar mr-2"></i>
-                            <span>15 Januari 2024</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=200&width=400" alt="Artikel 2" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <div class="text-sm text-akapack-orange mb-2">Success Story</div>
-                        <h3 class="text-xl font-semibold mb-3">Kisah Sukses UKM Keripik Mawar: Dari Plastik Biasa ke Kemasan Premium</h3>
-                        <p class="text-gray-600 mb-4">Bagaimana UKM Keripik Mawar meningkatkan penjualan 300% hanya dengan mengganti kemasan produk...</p>
-                        <div class="flex items-center text-sm text-gray-500">
-                            <i class="far fa-calendar mr-2"></i>
-                            <span>10 Januari 2024</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <img src="/placeholder.svg?height=200&width=400" alt="Artikel 3" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <div class="text-sm text-akapack-orange mb-2">Edukasi</div>
-                        <h3 class="text-xl font-semibold mb-3">Panduan Lengkap Memilih Kemasan Food Grade untuk Produk Makanan</h3>
-                        <p class="text-gray-600 mb-4">Pentingnya memilih kemasan yang aman untuk makanan dan standar yang harus dipenuhi UKM...</p>
-                        <div class="flex items-center text-sm text-gray-500">
-                            <i class="far fa-calendar mr-2"></i>
-                            <span>5 Januari 2024</span>
-                        </div>
-                    </div>
-                </article>
-            </div>
-
-            <!-- Belajar Kemasan Section -->
-            <div class="mt-20 bg-orange-50 rounded-lg p-8">
-                <div class="text-center mb-8">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Belajar Kemasan</h3>
-                    <p class="text-gray-600">Tingkatkan pengetahuan Anda tentang dunia kemasan dan branding</p>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-lg">
-                        <h4 class="font-semibold mb-2">Dasar-dasar Kemasan</h4>
-                        <p class="text-gray-600 text-sm mb-3">Pelajari jenis-jenis kemasan dan fungsinya untuk berbagai produk UKM</p>
-                        <a href="#" class="text-akapack-orange text-sm font-medium hover:underline">Baca Selengkapnya →</a>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-lg">
-                        <h4 class="font-semibold mb-2">Psikologi Warna dalam Kemasan</h4>
-                        <p class="text-gray-600 text-sm mb-3">Bagaimana warna kemasan mempengaruhi keputusan pembelian konsumen</p>
-                        <a href="#" class="text-akapack-orange text-sm font-medium hover:underline">Baca Selengkapnya →</a>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-lg">
-                        <h4 class="font-semibold mb-2">Regulasi Kemasan Makanan</h4>
-                        <p class="text-gray-600 text-sm mb-3">Panduan lengkap regulasi BPOM untuk kemasan produk makanan dan minuman</p>
-                        <a href="#" class="text-akapack-orange text-sm font-medium hover:underline">Baca Selengkapnya →</a>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-lg">
-                        <h4 class="font-semibold mb-2">Sustainable Packaging</h4>
-                        <p class="text-gray-600 text-sm mb-3">Tren kemasan ramah lingkungan dan manfaatnya untuk brand UKM</p>
-                        <a href="#" class="text-akapack-orange text-sm font-medium hover:underline">Baca Selengkapnya →</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="py-20 bg-gray-50">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-                <p class="text-xl text-gray-600">Jawaban untuk pertanyaan yang sering diajukan UKM</p>
-            </div>
-
-            <div class="space-y-4">
-                <div class="faq-item bg-white rounded-lg shadow-sm">
-                    <button onclick="toggleFAQ(this)" class="w-full text-left p-6 focus:outline-none">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold">Berapa minimum order untuk kemasan custom?</h3>
-                            <i class="fas fa-chevron-down transform transition-transform"></i>
-                        </div>
-                    </button>
-                    <div class="faq-content hidden px-6 pb-6">
-                        <p class="text-gray-600">Minimum order kami adalah 100 pcs untuk semua jenis kemasan. Ini adalah jumlah yang ideal untuk UKM yang baru memulai atau ingin mencoba desain baru.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item bg-white rounded-lg shadow-sm">
-                    <button onclick="toggleFAQ(this)" class="w-full text-left p-6 focus:outline-none">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold">Berapa lama proses produksi kemasan?</h3>
-                            <i class="fas fa-chevron-down transform transition-transform"></i>
-                        </div>
-                    </button>
-                    <div class="faq-content hidden px-6 pb-6">
-                        <p class="text-gray-600">Proses produksi memakan waktu 7-14 hari kerja setelah desain disetujui dan pembayaran lunas. Untuk order dalam jumlah besar (>5000 pcs), waktu produksi bisa lebih lama.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item bg-white rounded-lg shadow-sm">
-                    <button onclick="toggleFAQ(this)" class="w-full text-left p-6 focus:outline-none">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold">Apakah bisa request desain sendiri?</h3>
-                            <i class="fas fa-chevron-down transform transition-transform"></i>
-                        </div>
-                    </button>
-                    <div class="faq-content hidden px-6 pb-6">
-                        <p class="text-gray-600">Tentu saja! Anda bisa mengirimkan desain sendiri dalam format AI, PSD, atau PDF dengan resolusi tinggi. Tim kami akan membantu menyesuaikan desain dengan spesifikasi teknis kemasan.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item bg-white rounded-lg shadow-sm">
-                    <button onclick="toggleFAQ(this)" class="w-full text-left p-6 focus:outline-none">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold">Bagaimana sistem pembayaran?</h3>
-                            <i class="fas fa-chevron-down transform transition-transform"></i>
-                        </div>
-                    </button>
-                    <div class="faq-content hidden px-6 pb-6">
-                        <p class="text-gray-600">Kami menerima pembayaran via transfer bank, e-wallet (OVO, GoPay, DANA), dan QRIS. Sistem pembayaran 50% DP setelah desain approve, 50% pelunasan sebelum pengiriman.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item bg-white rounded-lg shadow-sm">
-                    <button onclick="toggleFAQ(this)" class="w-full text-left p-6 focus:outline-none">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold">Apakah kemasan sudah food grade?</h3>
-                            <i class="fas fa-chevron-down transform transition-transform"></i>
-                        </div>
-                    </button>
-                    <div class="faq-content hidden px-6 pb-6">
-                        <p class="text-gray-600">Ya, semua kemasan kami menggunakan material food grade yang aman untuk makanan dan minuman. Kami juga menyediakan sertifikat food grade jika diperlukan.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item bg-white rounded-lg shadow-sm">
-                    <button onclick="toggleFAQ(this)" class="w-full text-left p-6 focus:outline-none">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold">Bisakah kirim ke seluruh Indonesia?</h3>
-                            <i class="fas fa-chevron-down transform transition-transform"></i>
-                        </div>
-                    </button>
-                    <div class="faq-content hidden px-6 pb-6">
-                        <p class="text-gray-600">Ya, kami melayani pengiriman ke seluruh Indonesia melalui ekspedisi terpercaya seperti JNE, J&T, SiCepat, dan Pos Indonesia. Ongkir ditanggung pembeli.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Hubungi Kami</h2>
-                <p class="text-xl text-gray-600">Siap membantu mewujudkan kemasan impian UKM Anda</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-12">
-                <div>
-                    <h3 class="text-2xl font-semibold mb-6">Kontak Langsung</h3>
-                    
-                    <div class="space-y-6">
-                        <a href="https://wa.me/6281234567890" class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                            <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mr-4">
-                                <i class="fab fa-whatsapp text-white text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">WhatsApp</h4>
-                                <p class="text-gray-600">+62 812-3456-7890</p>
-                                <p class="text-sm text-green-600">Konsultasi gratis 24/7</p>
-                            </div>
+            <div class="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+                <div class="max-w-2xl text-white">
+                    <span
+                        class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs tracking-wide uppercase">
+                        <span class="h-2 w-2 rounded-full bg-brand"></span>
+                        Trusted by growing brands
+                    </span>
+                    <h1 class="mt-4 text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">
+                        Quality Packaging & Printing Solutions
+                    </h1>
+                    <p class="mt-4 text-base sm:text-lg text-slate-100/90">
+                        Elevate your brand with custom packaging and reliable printing. Fast turnaround, friendly
+                        support, and fair pricing for every business size.
+                    </p>
+                    <div class="mt-8 flex flex-wrap items-center gap-3">
+                        <a href="#contact"
+                            class="inline-flex items-center rounded-md bg-brand px-6 py-3 font-semibold text-white shadow hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand">
+                            Get a Quote
                         </a>
-
-                        <a href="https://instagram.com/akapack.id" class="flex items-center p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
-                            <div class="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center mr-4">
-                                <i class="fab fa-instagram text-white text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">Instagram</h4>
-                                <p class="text-gray-600">@akapack.id</p>
-                                <p class="text-sm text-pink-600">Lihat portfolio terbaru</p>
-                            </div>
-                        </a>
-
-                        <a href="https://facebook.com/akapack.id" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mr-4">
-                                <i class="fab fa-facebook text-white text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">Facebook</h4>
-                                <p class="text-gray-600">Akapack Indonesia</p>
-                                <p class="text-sm text-blue-600">Update dan tips UKM</p>
-                            </div>
-                        </a>
-
-                        <a href="https://shopee.co.id/akapack" class="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
-                            <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mr-4">
-                                <i class="fas fa-shopping-bag text-white text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold">Shopee</h4>
-                                <p class="text-gray-600">Akapack Official Store</p>
-                                <p class="text-sm text-orange-600">Belanja kemasan ready stock</p>
-                            </div>
+                        <a href="#services"
+                            class="inline-flex items-center rounded-md bg-white/10 px-6 py-3 font-semibold text-white hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/50">
+                            Explore Services
                         </a>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                    <div class="mt-8 p-6 bg-gray-50 rounded-lg">
-                        <h4 class="font-semibold mb-3">Jam Operasional</h4>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span>Senin - Jumat</span>
-                                <span>08:00 - 17:00 WIB</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Sabtu</span>
-                                <span>08:00 - 15:00 WIB</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Minggu</span>
-                                <span>Libur</span>
-                            </div>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-3">*WhatsApp 24/7 untuk konsultasi darurat</p>
+    <!-- Services Section -->
+    <section id="services" class="py-16 sm:py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Our Core Services</h2>
+                <p class="mt-3 text-slate-600">End-to-end solutions from design to delivery, tailored to your brand and
+                    budget.</p>
+            </div>
+
+            <div class="mt-12 grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- Service 1 -->
+                <div
+                    class="group rounded-xl border border-slate-100 hover:border-brand/30 shadow-sm hover:shadow-md transition p-6">
+                    <div class="h-12 w-12 rounded-lg bg-brand/10 text-brand flex items-center justify-center">
+                        <!-- box icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
+                            <path
+                                d="M11.7 1.046a1 1 0 0 1 .6 0l8 2.4a1 1 0 0 1 .7.96v10.6a2 2 0 0 1-1.2 1.84l-7.6 3.2a2 2 0 0 1-1.6 0l-7.6-3.2A2 2 0 0 1 2 14.995V4.406a1 1 0 0 1 .7-.96l8-2.4zM4 5.7v9.3l7 2.95V8.57L4 5.7zm9 12.25 7-2.95V5.7l-7 2.87v9.38zM12 3.14 5.176 5.18 12 8.25l6.824-3.07L12 3.14z" />
+                        </svg>
                     </div>
+                    <h3 class="mt-4 text-lg font-semibold text-slate-900">Packaging Solutions</h3>
+                    <p class="mt-2 text-sm text-slate-600">Standing pouch, sachet, and ziplock in various sizes and
+                        finishes to match your product needs.</p>
+                    <a href="#products"
+                        class="mt-4 inline-flex items-center text-brand font-medium hover:underline">Explore Products
+                        →</a>
                 </div>
 
-                <div>
-                    <h3 class="text-2xl font-semibold mb-6">Lokasi & Alamat</h3>
-                    
-                    <div class="bg-gray-100 rounded-lg p-6 mb-6">
-                        <h4 class="font-semibold mb-3">Kantor & Workshop</h4>
-                        <p class="text-gray-700 mb-2">
-                            Jl. Industri Kemasan No. 123<br>
-                            Kelurahan Kemasan Jaya<br>
-                            Kecamatan Packaging<br>
-                            Jakarta Timur 13450
-                        </p>
-                        <div class="flex items-center text-sm text-gray-600 mt-3">
-                            <i class="fas fa-map-marker-alt mr-2"></i>
-                            <span>15 menit dari Stasiun Cakung</span>
-                        </div>
+                <!-- Service 2 -->
+                <div
+                    class="group rounded-xl border border-slate-100 hover:border-brand/30 shadow-sm hover:shadow-md transition p-6">
+                    <div class="h-12 w-12 rounded-lg bg-brand/10 text-brand flex items-center justify-center">
+                        <!-- printer icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
+                            <path
+                                d="M6 2h12v4H6V2zm12 6h1a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-1v3H6v-3H5a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3h1V6h12v2zM6 16v4h12v-4H6z" />
+                        </svg>
                     </div>
-
-                    <!-- Simple Map Placeholder -->
-                    <div class="bg-gray-200 rounded-lg h-64 flex items-center justify-center mb-6">
-                        <div class="text-center text-gray-500">
-                            <i class="fas fa-map text-4xl mb-2"></i>
-                            <p>Peta Lokasi</p>
-                            <p class="text-sm">Klik untuk membuka Google Maps</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-akapack-orange text-white rounded-lg p-6">
-                        <h4 class="font-semibold mb-3">Kunjungi Workshop Kami!</h4>
-                        <p class="text-sm mb-3">
-                            Ingin melihat langsung proses produksi dan kualitas kemasan? 
-                            Anda bisa berkunjung ke workshop kami dengan appointment terlebih dahulu.
-                        </p>
-                        <button onclick="openOrderForm()" class="bg-white text-akapack-orange px-4 py-2 rounded font-medium hover:bg-gray-100 transition-colors">
-                            Buat Appointment
-                        </button>
-                    </div>
+                    <h3 class="mt-4 text-lg font-semibold text-slate-900">Printing Services</h3>
+                    <p class="mt-2 text-sm text-slate-600">High-fidelity printing with vibrant colors and sharp details
+                        for every packaging type.</p>
+                    <a href="#printing" class="mt-4 inline-flex items-center text-brand font-medium hover:underline">See
+                        Capabilities →</a>
                 </div>
+
+                <!-- Service 3 -->
+                <div
+                    class="group rounded-xl border border-slate-100 hover:border-brand/30 shadow-sm hover:shadow-md transition p-6">
+                    <div class="h-12 w-12 rounded-lg bg-brand/10 text-brand flex items-center justify-center">
+                        <!-- spark icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
+                            <path
+                                d="M12 2l1.76 5.42L19 9l-5.24 1.58L12 16l-1.76-5.42L5 9l5.24-1.58L12 2zm0 6.5 1.01 3.11L16.5 12l-3.49.39L12 15.5l-1.01-3.11L7.5 12l3.49-.39L12 8.5z" />
+                        </svg>
+                    </div>
+                    <h3 class="mt-4 text-lg font-semibold text-slate-900">Custom Orders</h3>
+                    <p class="mt-2 text-sm text-slate-600">Tailored designs, materials, and finishes. Flexible MOQs for
+                        startups and growing brands.</p>
+                    <a href="#contact"
+                        class="mt-4 inline-flex items-center text-brand font-medium hover:underline">Request Quote →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Anchor (placeholder) -->
+    <section id="products" class="py-12 sm:py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Products</h2>
+                <p class="mt-2 text-slate-600">Explore our range of packaging types: standing pouch, sachet, ziplock,
+                    and more.</p>
+            </div>
+            <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="rounded-lg border border-slate-200 p-5">
+                    <h3 class="font-semibold">Standing Pouch</h3>
+                    <p class="text-sm text-slate-600 mt-1">Durable, shelf-ready with multiple size options.</p>
+                </div>
+                <div class="rounded-lg border border-slate-200 p-5">
+                    <h3 class="font-semibold">Sachet</h3>
+                    <p class="text-sm text-slate-600 mt-1">Great for samples and single-use packs.</p>
+                </div>
+                <div class="rounded-lg border border-slate-200 p-5">
+                    <h3 class="font-semibold">Ziplock</h3>
+                    <p class="text-sm text-slate-600 mt-1">Resealable convenience with premium look.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Printing Services Anchor (placeholder) -->
+    <section id="printing" class="py-12 sm:py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Printing Services</h2>
+                <p class="mt-2 text-slate-600">From digital to flexographic, achieve vivid colors and crisp detail
+                    across materials.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Anchor (placeholder) -->
+    <section id="about" class="py-12 sm:py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900">About Us</h2>
+                <p class="mt-2 text-slate-600">We help brands stand out with professional packaging and dependable
+                    printing — on time, on budget.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="py-16 sm:py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">What Clients Say</h2>
+                <p class="mt-3 text-slate-600">Real feedback from growing businesses we proudly support.</p>
+            </div>
+
+            <div class="mt-12 grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <figure class="rounded-xl border border-slate-100 shadow-sm p-6 bg-white">
+                    <blockquote class="text-slate-700">“Great quality and fast turnaround. Our coffee pouches look
+                        premium and our customers noticed!”</blockquote>
+                    <figcaption class="mt-4 text-sm text-slate-500">Dewi, Founder of Kopi Nusantara</figcaption>
+                </figure>
+
+                <figure class="rounded-xl border border-slate-100 shadow-sm p-6 bg-white">
+                    <blockquote class="text-slate-700">“Helpful team and transparent pricing. Perfect for small batches
+                        when we were just starting.”</blockquote>
+                    <figcaption class="mt-4 text-sm text-slate-500">Rama, Owner of SnackKita</figcaption>
+                </figure>
+
+                <figure class="rounded-xl border border-slate-100 shadow-sm p-6 bg-white">
+                    <blockquote class="text-slate-700">“The print colors are vibrant and consistent across our product
+                        line. Highly recommended.”</blockquote>
+                    <figcaption class="mt-4 text-sm text-slate-500">Sinta, Brand Manager at Herbal Sehat</figcaption>
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact / CTA Anchor (minimal) -->
+    <section id="contact" class="py-16 sm:py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Contact</h2>
+                <p class="mt-3 text-slate-600">Tell us about your project and get a fast, friendly quote.</p>
+            </div>
+            <div class="mt-6 flex flex-wrap items-center gap-3">
+                <a href="mailto:hello@akapack.co"
+                    class="inline-flex items-center rounded-md bg-brand px-5 py-3 font-semibold text-white hover:bg-brand-dark">Email
+                    Us</a>
+                <a href="tel:+6281234567890"
+                    class="inline-flex items-center rounded-md border border-brand text-brand px-5 py-3 font-semibold hover:bg-brand/5">Call/WhatsApp</a>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8">
+    <footer class="bg-slate-900 text-slate-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
-                    <div class="text-2xl font-bold text-akapack-orange mb-4">Akapack</div>
-                    <p class="text-gray-300 mb-4">
-                        Solusi kemasan custom terpercaya untuk UKM Indonesia. 
-                        Wujudkan brand impian Anda dengan kemasan berkualitas tinggi.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-300 hover:text-akapack-orange">
-                            <i class="fab fa-facebook text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-akapack-orange">
-                            <i class="fab fa-instagram text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-akapack-orange">
-                            <i class="fab fa-whatsapp text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-akapack-orange">
-                            <i class="fab fa-tiktok text-xl"></i>
-                        </a>
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-brand text-white font-bold">A</span>
+                        <span class="text-lg font-semibold text-white">Akapack</span>
                     </div>
+                    <p class="mt-4 text-sm">Quality packaging and printing solutions for brands of all sizes. We make
+                        your products look their best.</p>
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Produk</h3>
-                    <ul class="space-y-2 text-gray-300">
-                        <li><a href="#" class="hover:text-akapack-orange">Standing Pouch</a></li>
-                        <li><a href="#" class="hover:text-akapack-orange">Sachet</a></li>
-                        <li><a href="#" class="hover:text-akapack-orange">Ziplock</a></li>
-                        <li><a href="#" class="hover:text-akapack-orange">Flat Bottom</a></li>
-                        <li><a href="#" class="hover:text-akapack-orange">Side Gusset</a></li>
-                        <li><a href="#" class="hover:text-akapack-orange">Custom Shape</a></li>
+                    <h3 class="text-white font-semibold">Company</h3>
+                    <ul class="mt-3 space-y-2 text-sm">
+                        <li><a href="#about" class="hover:text-white">About Us</a></li>
+                        <li><a href="#products" class="hover:text-white">Products</a></li>
+                        <li><a href="#printing" class="hover:text-white">Printing Services</a></li>
+                        <li><a href="#contact" class="hover:text-white">Contact</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Layanan</h3>
-                    <ul class="space-y-2 text-gray-300">
-                        <li><a href="#" class="hover:text-akapack-orange">Konsultasi Gratis</a></li>
-                        <li><a href="#" class="hover:text-akapack-orange">Design Custom</a></li>
-                        <li><a href="#" class="hover:text-akapack-orange">Produksi Cepat</a></li>
-                        <li><a href="#" class="hover:text-akapack-orange">Quality Control</a></li>
-                        <li><a href="#" class="hover:text-akapack-orange">Pengiriman Nasional</a></li>
-                        <li><a href="#" class="hover:text-akapack-orange">After Sales Support</a></li>
+                    <h3 class="text-white font-semibold">Follow Us</h3>
+                    <ul class="mt-3 space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-white">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white">Facebook</a></li>
+                        <li><a href="#" class="hover:text-white">LinkedIn</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Kontak</h3>
-                    <ul class="space-y-2 text-gray-300">
-                        <li class="flex items-center">
-                            <i class="fas fa-phone mr-2"></i>
-                            <span>+62 812-3456-7890</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-envelope mr-2"></i>
-                            <span>info@akapack.id</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-map-marker-alt mr-2 mt-1"></i>
-                            <span>Jl. Industri Kemasan No. 123<br>Jakarta Timur 13450</span>
-                        </li>
+                    <h3 class="text-white font-semibold">Contact</h3>
+                    <ul class="mt-3 space-y-2 text-sm">
+                        <li>Email: <a class="hover:text-white" href="mailto:hello@akapack.co">hello@akapack.co</a></li>
+                        <li>Phone/WA: <a class="hover:text-white" href="tel:+6281234567890">+62 812-3456-7890</a></li>
+                        <li>Address: Jakarta, Indonesia</li>
                     </ul>
                 </div>
             </div>
 
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-                <p>&copy; 2024 Akapack Indonesia. All rights reserved. | Solusi Kemasan Custom untuk UKM Indonesia</p>
+            <div
+                class="mt-10 border-t border-slate-800 pt-6 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-3">
+                <p>© <span id="year"></span> Akapack. All rights reserved.</p>
+                <p>Built with Tailwind CSS.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Order Form Modal -->
-    <div id="order-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-2xl font-bold text-gray-900">Pesan Custom Sekarang</h3>
-                    <button onclick="closeOrderForm()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-
-                <form id="order-form" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap *</label>
-                        <input type="text" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-akapack-orange focus:border-transparent">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nomor WhatsApp *</label>
-                        <input type="tel" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-akapack-orange focus:border-transparent" placeholder="08123456789">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Kemasan *</label>
-                        <select id="package-type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-akapack-orange focus:border-transparent">
-                            <option value="">Pilih jenis kemasan</option>
-                            <option value="Standing Pouch">Standing Pouch</option>
-                            <option value="Sachet">Sachet</option>
-                            <option value="Ziplock">Ziplock</option>
-                            <option value="Flat Bottom">Flat Bottom</option>
-                            <option value="Side Gusset">Side Gusset</option>
-                            <option value="Custom Shape">Custom Shape</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah/Quantity *</label>
-                        <input type="number" required min="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-akapack-orange focus:border-transparent" placeholder="Minimum 100 pcs">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Ukuran Kemasan</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-akapack-orange focus:border-transparent" placeholder="Contoh: 12x20cm">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload Logo/Design (Opsional)</label>
-                        <input type="file" accept="image/*,.pdf,.ai,.psd" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-akapack-orange focus:border-transparent">
-                        <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG, PDF, AI, PSD (Max 10MB)</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Tambahan</label>
-                        <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-akapack-orange focus:border-transparent" placeholder="Jelaskan kebutuhan khusus, warna yang diinginkan, dll."></textarea>
-                    </div>
-
-                    <div class="flex gap-3 pt-4">
-                        <button type="button" onclick="closeOrderForm()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-                            Batal
-                        </button>
-                        <button type="submit" class="flex-1 px-4 py-2 bg-akapack-orange text-white rounded-lg hover:bg-akapack-orange-dark">
-                            Kirim Pesanan
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chat Widget -->
-    <div id="chat-widget" class="fixed bottom-6 right-6 z-40">
-        <button onclick="toggleChat()" class="bg-akapack-orange text-white w-14 h-14 rounded-full shadow-lg hover:bg-akapack-orange-dark transition-all hover:scale-110">
-            <i class="fas fa-comments text-xl"></i>
-        </button>
-        
-        <div id="chat-popup" class="hidden absolute bottom-16 right-0 bg-white rounded-lg shadow-xl w-80 border">
-            <div class="bg-akapack-orange text-white p-4 rounded-t-lg">
-                <h4 class="font-semibold">Butuh Bantuan?</h4>
-                <p class="text-sm opacity-90">Tim kami siap membantu Anda</p>
-            </div>
-            <div class="p-4 space-y-3">
-                <a href="https://wa.me/6281234567890" class="flex items-center p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                    <i class="fab fa-whatsapp text-green-500 text-xl mr-3"></i>
-                    <div>
-                        <div class="font-medium text-sm">WhatsApp</div>
-                        <div class="text-xs text-gray-600">Respon cepat 24/7</div>
-                    </div>
-                </a>
-                <button onclick="openOrderForm()" class="w-full flex items-center p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
-                    <i class="fas fa-shopping-cart text-akapack-orange text-xl mr-3"></i>
-                    <div class="text-left">
-                        <div class="font-medium text-sm">Pesan Custom</div>
-                        <div class="text-xs text-gray-600">Form pemesanan cepat</div>
-                    </div>
-                </button>
-                <a href="tel:+6281234567890" class="flex items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                    <i class="fas fa-phone text-blue-500 text-xl mr-3"></i>
-                    <div>
-                        <div class="font-medium text-sm">Telepon</div>
-                        <div class="text-xs text-gray-600">Konsultasi langsung</div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-
+    <!-- Minimal JS for mobile menu and year -->
     <script>
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenu.classList.toggle('hidden');
-        }
-
-        // Banner slider functionality
-        let currentSlide = 0;
-        const totalSlides = 3;
-
-        function goToSlide(slideIndex) {
-            currentSlide = slideIndex;
-            const slider = document.getElementById('banner-slider');
-            slider.style.transform = `translateX(-${slideIndex * 100}%)`;
-            
-            // Update dots
-            const dots = document.querySelectorAll('.banner-dot');
-            dots.forEach((dot, index) => {
-                if (index === slideIndex) {
-                    dot.classList.remove('opacity-50');
-                    dot.classList.add('opacity-100');
-                } else {
-                    dot.classList.remove('opacity-100');
-                    dot.classList.add('opacity-50');
-                }
+        const mobileButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const yearEl = document.getElementById('year');
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+        if (mobileButton && mobileMenu) {
+            mobileButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            mobileMenu.querySelectorAll('a').forEach((link) => {
+                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
             });
         }
-
-        // Auto-rotate banner
-        setInterval(() => {
-            currentSlide = (currentSlide + 1) % totalSlides;
-            goToSlide(currentSlide);
-        }, 5000);
-
-        // Initialize first slide
-        goToSlide(0);
-
-        // Order form functionality
-        function openOrderForm(packageType = '') {
-            const modal = document.getElementById('order-modal');
-            const select = document.getElementById('package-type');
-            
-            if (packageType) {
-                select.value = packageType;
-            }
-            
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeOrderForm() {
-            const modal = document.getElementById('order-modal');
-            modal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        // Handle form submission
-        document.getElementById('order-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
-            
-            // Create WhatsApp message
-            let message = `Halo Akapack! Saya ingin memesan kemasan custom:\n\n`;
-            message += `Nama: ${data.name || this.querySelector('input[type="text"]').value}\n`;
-            message += `WhatsApp: ${data.whatsapp || this.querySelector('input[type="tel"]').value}\n`;
-            message += `Jenis Kemasan: ${data.packageType || this.querySelector('select').value}\n`;
-            message += `Quantity: ${data.quantity || this.querySelector('input[type="number"]').value} pcs\n`;
-            
-            if (data.size || this.querySelector('input[placeholder*="12x20cm"]').value) {
-                message += `Ukuran: ${data.size || this.querySelector('input[placeholder*="12x20cm"]').value}\n`;
-            }
-            
-            if (data.notes || this.querySelector('textarea').value) {
-                message += `Catatan: ${data.notes || this.querySelector('textarea').value}\n`;
-            }
-            
-            message += `\nMohon info lebih lanjut. Terima kasih!`;
-            
-            const whatsappUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
-            
-            closeOrderForm();
-        });
-
-        // Chat widget functionality
-        function toggleChat() {
-            const popup = document.getElementById('chat-popup');
-            popup.classList.toggle('hidden');
-        }
-
-        // Close chat when clicking outside
-        document.addEventListener('click', function(e) {
-            const chatWidget = document.getElementById('chat-widget');
-            const chatPopup = document.getElementById('chat-popup');
-            
-            if (!chatWidget.contains(e.target)) {
-                chatPopup.classList.add('hidden');
-            }
-        });
-
-        // FAQ functionality
-        function toggleFAQ(button) {
-            const content = button.nextElementSibling;
-            const icon = button.querySelector('i');
-            
-            content.classList.toggle('hidden');
-            icon.classList.toggle('rotate-180');
-        }
-
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-                
-                // Close mobile menu if open
-                const mobileMenu = document.getElementById('mobile-menu');
-                mobileMenu.classList.add('hidden');
-            });
-        });
-
-        // Close modal when clicking outside
-        document.getElementById('order-modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeOrderForm();
-            }
-        });
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeOrderForm();
-            }
-        });
     </script>
 </body>
+
 </html>
