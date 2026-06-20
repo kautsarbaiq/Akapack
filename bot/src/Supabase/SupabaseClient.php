@@ -67,6 +67,41 @@ final class SupabaseClient implements Db
         return array_map([$this, 'scrub'], $rows);
     }
 
+    /**
+     * INSERT satu baris (PostgREST POST). Dipakai untuk memori percakapan.
+     * @param array<string,mixed> $row
+     */
+    public function insert(string $table, array $row): void
+    {
+        $this->assertNoForbidden($row);
+
+        $endpoint = $this->url . '/rest/v1/' . rawurlencode($table);
+        $ch = curl_init($endpoint);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => [
+                'apikey: ' . $this->anonKey,
+                'Authorization: Bearer ' . $this->anonKey,
+                'Content-Type: application/json',
+                'Prefer: return=minimal',
+            ],
+            CURLOPT_POSTFIELDS => json_encode($row, JSON_UNESCAPED_UNICODE),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => $this->timeout,
+        ]);
+        $body = curl_exec($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err = curl_error($ch);
+        curl_close($ch);
+
+        if ($body === false) {
+            throw new \RuntimeException('Supabase insert gagal: ' . $err);
+        }
+        if ($code >= 400) {
+            throw new \RuntimeException("Supabase insert HTTP {$code}: " . mb_substr((string) $body, 0, 200));
+        }
+    }
+
     /** Tolak query yang menyentuh kolom rahasia (di key maupun value). */
     private function assertNoForbidden(array $query): void
     {
