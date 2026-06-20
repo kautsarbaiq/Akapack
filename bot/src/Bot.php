@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Akapack\Bot;
 
+use Akapack\Bot\Handler\ClaudeHandler;
 use Akapack\Bot\Handler\EchoHandler;
 use Akapack\Bot\Handler\Handler;
+use Akapack\Bot\Llm\AnthropicClient;
 use Akapack\Bot\Store\FileStore;
 use Akapack\Bot\Store\RedisStore;
 use Akapack\Bot\Store\Store;
@@ -43,8 +45,23 @@ final class Bot
             $this->config->dataDir . '/outgoing.log',
         );
 
-        // Fase 0: echo. Ganti ke ClaudeHandler di Fase 1.
-        $this->handler = new EchoHandler($this->config->botName);
+        $this->handler = $this->buildHandler();
+    }
+
+    /**
+     * Fase 1: ClaudeHandler bila ANTHROPIC_API_KEY terisi (dan SDK tersedia);
+     * jika tidak, fallback ke EchoHandler (mis. dev tanpa kredensial).
+     */
+    private function buildHandler(): Handler
+    {
+        if ($this->config->anthropicApiKey !== '' && class_exists(\Anthropic\Client::class)) {
+            $llm = new AnthropicClient($this->config->anthropicApiKey, $this->config->claudeModel);
+            $system = SystemPrompt::faq($this->config->botName, $this->config->companyName);
+            return new ClaudeHandler($llm, $system);
+        }
+
+        $this->logger->warn('ANTHROPIC_API_KEY kosong / SDK absen — pakai EchoHandler (Fase 0)');
+        return new EchoHandler($this->config->botName);
     }
 
     public function receiver(): Receiver
