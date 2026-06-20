@@ -22,12 +22,21 @@ WhatsApp Cloud API (webhook)
 |------|-----|--------|
 | **0** | Echo-bot + queue async **at-least-once** (receiver, worker, debounce, dedup idempotent, retry, eskalasi, mode HUMAN) | ✅ selesai |
 | **1** | `ClaudeHandler` — FAQ via Claude API (SDK resmi, adaptive thinking, effort medium, prompt caching, anti-refusal) | ✅ selesai |
-| 2 | Tools function-call ke Supabase (produk/stok/harga/kategori) | ⏭️ berikutnya |
-| 3 | Eskalasi admin per-cabang + memori percakapan (sliding-window) | ⏳ |
+| **2** | `ClaudeToolHandler` — tools function-call Supabase (cari_produk/cek_stok/cek_harga/daftar_kategori) + guardrail cost_price | ✅ selesai |
+| 3 | Eskalasi admin per-cabang + memori percakapan (sliding-window) | ⏭️ berikutnya |
 
-Handler dipilih otomatis di `src/Bot.php`: **ClaudeHandler** bila `ANTHROPIC_API_KEY`
-terisi, jika tidak fallback ke **EchoHandler** (dev tanpa kredensial). Model default
-`claude-sonnet-4-6` (ubah via `CLAUDE_MODEL`). Tanpa `temperature/top_p/budget_tokens`.
+Handler dipilih otomatis di `src/Bot.php`:
+- **ClaudeToolHandler** (Fase 2) bila `ANTHROPIC_API_KEY` **dan** `SUPABASE_URL`/`SUPABASE_ANON_KEY` terisi → bot bisa jawab produk/stok/harga real-time.
+- **ClaudeHandler** (Fase 1) bila hanya Claude yang terisi → FAQ saja.
+- **EchoHandler** (Fase 0) bila tak ada kredensial → dev.
+
+Model default `claude-sonnet-4-6` (ubah via `CLAUDE_MODEL`). Tanpa
+`temperature/top_p/budget_tokens`.
+
+> **Guardrail cost_price (kritis):** RLS internal OFF → anon key BISA baca `cost_price`.
+> Karena itu `SupabaseClient` menolak query yang menyebut kolom modal DAN men-scrub
+> `cost_price/buy_price/modal/margin` rekursif dari semua baris. Tool tidak pernah
+> SELECT kolom modal. Diuji end-to-end (termasuk `select=*` → tetap ter-scrub).
 
 ## Struktur
 
@@ -124,6 +133,16 @@ php tools/test_claude.php
 Memverifikasi passthrough balasan, fallback saat refusal/empty (arahkan *admin*),
 input kosong, dan integrasi penuh via Worker. Untuk produksi, isi `ANTHROPIC_API_KEY`
 di `.env` lalu bot otomatis memakai Claude.
+
+Uji Fase 2 (tools Supabase) — unit + **live** ke Supabase asli:
+
+```bash
+php tools/test_supabase.php
+```
+
+Bagian unit memakai DB palsu (tier harga, mapping cabang, guardrail cost_price).
+Bagian LIVE konek anon key dari `~/Documents/akapack/.env.local` dan menguji
+`cari_produk/cek_stok/cek_harga/daftar_kategori` + memastikan `cost_price` tak bocor.
 
 ## Keandalan (at-least-once)
 
