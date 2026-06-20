@@ -21,11 +21,13 @@ WhatsApp Cloud API (webhook)
 | Fase | Isi | Status |
 |------|-----|--------|
 | **0** | Echo-bot + queue async **at-least-once** (receiver, worker, debounce, dedup idempotent, retry, eskalasi, mode HUMAN) | ✅ selesai |
-| 1 | Ganti `EchoHandler` → `ClaudeHandler` (FAQ via Claude API) | ⏭️ berikutnya |
-| 2 | Tools function-call ke Supabase (produk/stok/harga/kategori) | ⏳ |
+| **1** | `ClaudeHandler` — FAQ via Claude API (SDK resmi, adaptive thinking, effort medium, prompt caching, anti-refusal) | ✅ selesai |
+| 2 | Tools function-call ke Supabase (produk/stok/harga/kategori) | ⏭️ berikutnya |
 | 3 | Eskalasi admin per-cabang + memori percakapan (sliding-window) | ⏳ |
 
-Mengganti fase = tukar `Handler` di `src/Bot.php`. Seam-nya sudah disiapkan.
+Handler dipilih otomatis di `src/Bot.php`: **ClaudeHandler** bila `ANTHROPIC_API_KEY`
+terisi, jika tidak fallback ke **EchoHandler** (dev tanpa kredensial). Model default
+`claude-sonnet-4-6` (ubah via `CLAUDE_MODEL`). Tanpa `temperature/top_p/budget_tokens`.
 
 ## Struktur
 
@@ -112,6 +114,16 @@ memicu eskalasi walau digabung dengan teks lain (mode → HUMAN, bot diam); **re
 saat kirim gagal (buffer ditahan, dicoba lagi); dan keamanan tanda tangan
 (tanpa/ salah signature → 403, valid → 200, fail-closed saat secret kosong).
 Pesan keluar ditulis ke `var/test/outgoing.log` (driver `log`, bukan kirim sungguhan).
+
+Uji Fase 1 (ClaudeHandler) tanpa kredensial — pakai LLM palsu:
+
+```bash
+php tools/test_claude.php
+```
+
+Memverifikasi passthrough balasan, fallback saat refusal/empty (arahkan *admin*),
+input kosong, dan integrasi penuh via Worker. Untuk produksi, isi `ANTHROPIC_API_KEY`
+di `.env` lalu bot otomatis memakai Claude.
 
 ## Keandalan (at-least-once)
 
