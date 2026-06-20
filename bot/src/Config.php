@@ -30,6 +30,11 @@ final class Config
         public readonly string $dataDir,
         public readonly string $anthropicApiKey,
         public readonly string $claudeModel,
+        public readonly string $supabaseUrl,
+        public readonly string $supabaseAnonKey,
+        public readonly string $tenantId,
+        public readonly string $outletBandung,
+        public readonly string $outletGarut,
     ) {
     }
 
@@ -71,6 +76,11 @@ final class Config
             dataDir: $dataDir,
             anthropicApiKey: $get('ANTHROPIC_API_KEY'),
             claudeModel: $get('CLAUDE_MODEL', 'claude-sonnet-4-6'),
+            supabaseUrl: rtrim($get('SUPABASE_URL'), '/'),
+            supabaseAnonKey: $get('SUPABASE_ANON_KEY'),
+            tenantId: $get('TENANT_ID', '00000000-0000-0000-0000-000000000001'),
+            outletBandung: $get('OUTLET_BANDUNG', '00000000-0000-0000-0000-000000000002'),
+            outletGarut: $get('OUTLET_GARUT', '00000000-0000-0000-0000-000000000003'),
         );
     }
 }
