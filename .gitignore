@@ -1,0 +1,3 @@
+# Local editor/launch config (machine-specific absolute paths)
+.claude/
+.DS_Store
