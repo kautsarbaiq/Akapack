@@ -1,0 +1,140 @@
+# AKAPACK WhatsApp Bot — "Mbak Aka"
+
+Bot auto-reply WhatsApp AI untuk AKAPACK (grosir B2B kemasan plastik & mesin,
+cabang Bandung & Garut). Arsitektur **async wajib**: webhook hanya menerima &
+antri, semua proses berat (Claude, query Supabase) di worker terpisah.
+
+```
+WhatsApp Cloud API (webhook)
+        │
+   ┌────▼─────┐  verifikasi tanda tangan, dedup message_id,
+   │ RECEIVER │  enqueue, balas 200 (<5 dtk). TANPA Claude.
+   └────┬─────┘  → bot/public/webhook.php
+        │   (Redis / file queue)
+   ┌────▼─────┐  debounce 3–5 dtk → ROUTER (mode BOT/HUMAN,
+   │  WORKER  │  kata kunci "admin"/"cs" = eskalasi) → Handler → Send API
+   └──────────┘  → bin/worker.php (daemon)
+```
+
+## Status fase
+
+| Fase | Isi | Status |
+|------|-----|--------|
+| **0** | Echo-bot + queue async **at-least-once** (receiver, worker, debounce, dedup idempotent, retry, eskalasi, mode HUMAN) | ✅ selesai |
+| 1 | Ganti `EchoHandler` → `ClaudeHandler` (FAQ via Claude API) | ⏭️ berikutnya |
+| 2 | Tools function-call ke Supabase (produk/stok/harga/kategori) | ⏳ |
+| 3 | Eskalasi admin per-cabang + memori percakapan (sliding-window) | ⏳ |
+
+Mengganti fase = tukar `Handler` di `src/Bot.php`. Seam-nya sudah disiapkan.
+
+## Struktur
+
+```
+bot/
+├─ public/webhook.php   # RECEIVER (titik masuk webhook)
+├─ bin/worker.php       # WORKER daemon (--once / --drain untuk test/cron)
+├─ tools/simulate.php   # uji integrasi pipeline tanpa kredensial
+├─ src/
+│  ├─ Receiver.php      # verifikasi sig, dedup, enqueue
+│  ├─ Worker.php        # debounce loop, router, eskalasi
+│  ├─ WhatsApp.php      # Send API (driver api|log)
+│  ├─ Store/            # Store interface + RedisStore + FileStore
+│  ├─ Handler/          # Handler interface + EchoHandler (Fase 0)
+│  ├─ Config.php Env.php Logger.php Bot.php Response.php
+├─ .env.example
+└─ composer.json
+```
+
+## Setup
+
+```bash
+cd bot
+cp .env.example .env        # isi token WA + (nanti) Claude/Supabase
+composer install            # untuk driver Redis (predis). Driver file jalan tanpa ini.
+```
+
+Isi `.env` minimal untuk produksi:
+`WA_VERIFY_TOKEN`, `WA_APP_SECRET`, `WA_ACCESS_TOKEN`, `WA_PHONE_NUMBER_ID`,
+`QUEUE_DRIVER=redis`, `REDIS_DSN`.
+
+> **Keamanan (fail-closed):** receiver memverifikasi `X-Hub-Signature-256`. Bila
+> `WA_APP_SECRET` kosong, webhook POST **ditolak 403** — kecuali kamu set
+> `WA_ALLOW_INSECURE_WEBHOOK=1` secara eksplisit (HANYA untuk dev). Jadi lupa
+> mengisi secret di produksi = bot menolak semua pesan, bukan menerima yang palsu.
+
+## Worker sebagai service (systemd, VPS)
+
+`/etc/systemd/system/akapack-bot.service`:
+
+```ini
+[Unit]
+Description=AKAPACK WhatsApp Bot worker
+After=network.target redis-server.service
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/akapack/bot
+ExecStart=/usr/bin/php /var/www/akapack/bot/bin/worker.php
+Restart=always
+RestartSec=2
+User=www-data
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl enable --now akapack-bot
+sudo journalctl -u akapack-bot -f
+```
+
+Worker menangani `SIGTERM`/`SIGINT` untuk shutdown rapi (`systemctl stop` aman).
+
+## Webhook (nginx + php-fpm)
+
+Arahkan Meta webhook ke `https://DOMAIN/bot/public/webhook.php`
+(atau ke `whatsapp_bot.php` lama — sudah jadi shim ke file yang sama).
+
+Di Meta App → WhatsApp → Configuration:
+- **Callback URL**: URL di atas
+- **Verify token**: sama dengan `WA_VERIFY_TOKEN`
+- Subscribe field **messages**.
+
+## Uji lokal (tanpa kredensial)
+
+```bash
+php tools/simulate.php
+```
+
+Menjalankan 22 assertion: debounce menggabungkan pesan beruntun; dedup
+idempotent (Meta kirim ulang `message_id` → tidak ada balasan ganda); "cs"/"admin"
+memicu eskalasi walau digabung dengan teks lain (mode → HUMAN, bot diam); **retry**
+saat kirim gagal (buffer ditahan, dicoba lagi); dan keamanan tanda tangan
+(tanpa/ salah signature → 403, valid → 200, fail-closed saat secret kosong).
+Pesan keluar ditulis ke `var/test/outgoing.log` (driver `log`, bukan kirim sungguhan).
+
+## Keandalan (at-least-once)
+
+Receiver TIDAK menandai pesan "sudah dibalas". Ia hanya `appendBuffer` +
+`scheduleDue`, lalu selalu balas 200 (kecuali tanda tangan tak valid → 403).
+Worker membaca buffer **non-destruktif** (`peekBuffer`), dan **hanya setelah
+balasan terkirim sukses** ia menandai `markSeen(message_id)` + `ackBuffer`.
+
+Konsekuensinya:
+- **Gagal kirim / crash** → buffer tetap utuh, due di-arm ulang
+  (`RETRY_BACKOFF_SECONDS`) → dicoba lagi sampai sukses atau usia melewati
+  `MAX_RETRY_AGE_SECONDS` (lalu menyerah + log).
+- **Meta kirim ulang webhook** (umum saat balasan 200 telat) → fragmen di-append
+  lagi, tapi worker melewati `message_id` yang sudah dibalas → **tidak ada
+  balasan ganda**.
+- Trade-off: prioritas "tidak ada pesan hilang" di atas "tidak ada duplikat".
+  Pada kegagalan jaringan langka, satu balasan bisa terkirim dua kali.
+
+## Catatan operasional
+
+- **Queue Redis** disarankan di produksi (debounce via sorted set, dedup atomik,
+  aman multi-worker). **File queue** cocok dev / volume kecil (1 worker).
+- Mode `HUMAN` tidak auto-reset — admin melepas dengan mereset
+  `wa:mode:<nomor>` (Redis) / `var/modes.json` (file). Pelepasan via perintah
+  admin dibuat di Fase 3.
+- Jendela 24 jam: balasan ke pesan masuk dalam 24 jam gratis & bebas template.
