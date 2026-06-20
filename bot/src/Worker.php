@@ -25,6 +25,7 @@ final class Worker
         private readonly WhatsApp $whatsapp,
         private readonly Handler $handler,
         private readonly Logger $logger,
+        private readonly Escalator $escalator,
     ) {
     }
 
@@ -122,7 +123,7 @@ final class Worker
         // Kata kunci eskalasi langsung — dicek PER fragmen (sebelum digabung),
         // agar "halo" lalu "cs" tetap memicu eskalasi.
         if ($this->hasEscalationKeyword($fresh)) {
-            if ($this->escalate($waId, 'permintaan_langsung', $this->combineText($fresh))) {
+            if ($this->escalator->escalate($waId, 'permintaan_langsung', $this->combineText($fresh), null, true)) {
                 $this->store->markSeen($freshIds, $this->config->dedupTtl);
                 $this->store->ackBuffer($waId, $allIds);
             } else {
@@ -153,48 +154,6 @@ final class Worker
             $this->logger->warn('Kirim gagal, dijadwalkan ulang', ['waId' => $waId]);
             $this->store->scheduleDue($waId, $now + $this->config->retryBackoffSeconds);
         }
-    }
-
-    /**
-     * Eskalasi: notifikasi admin DULU, baru set mode=HUMAN setelah terkirim,
-     * supaya tidak ada user yang "nyangkut" di mode HUMAN tanpa admin tahu.
-     * @return bool true bila handoff berhasil (boleh di-ack), false -> retry.
-     */
-    private function escalate(string $waId, string $reason, string $text): bool
-    {
-        $admins = array_values(array_unique(array_filter([
-            $this->config->adminWaBandung,
-            $this->config->adminWaGarut,
-        ])));
-
-        $notice = "🔔 Handoff {$this->config->companyName}\n"
-            . "Dari: {$waId}\n"
-            . "Alasan: {$reason}\n"
-            . "Pesan terakhir:\n" . mb_substr($text, 0, 500);
-
-        $delivered = $admins === []; // tanpa admin dikonfigurasi: lanjut handoff
-        foreach ($admins as $admin) {
-            if ($this->whatsapp->sendText($admin, $notice)) {
-                $delivered = true;
-            }
-        }
-
-        if (!$delivered) {
-            $this->logger->warn('Notifikasi admin gagal, eskalasi ditunda (retry)', ['waId' => $waId]);
-            return false;
-        }
-
-        $this->store->setMode($waId, 'HUMAN');
-        $this->logger->info('Eskalasi ke admin', ['waId' => $waId, 'reason' => $reason]);
-
-        if (!$this->whatsapp->sendText(
-            $waId,
-            "Baik kak 🙏 aku sambungkan ke admin ya. Mohon tunggu sebentar, "
-            . "nanti dibalas langsung sama tim kami."
-        )) {
-            $this->logger->warn('Balasan eskalasi ke user gagal (admin sudah diberi tahu)', ['waId' => $waId]);
-        }
-        return true;
     }
 
     /** Fragmen yang message_id-nya BELUM pernah dibalas, unik per-id. */
