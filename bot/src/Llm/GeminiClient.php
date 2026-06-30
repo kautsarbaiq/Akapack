@@ -57,19 +57,20 @@ final class GeminiClient implements LlmClient, ToolRunner
                 return ['text' => $this->collectText($parts), 'refused' => false];
             }
 
-            // Umpan balik: turn model (functionCall) + turn user (functionResponse).
-            $contents[] = ['role' => 'model', 'parts' => $parts];
+            // Turn model: pertahankan parts (termasuk thoughtSignature), tapi pastikan
+            // functionCall.args = OBJECT — args kosong harus {} bukan [] (Gemini tolak list).
+            $contents[] = ['role' => 'model', 'parts' => array_map([self::class, 'normalizeArgs'], $parts)];
+
             $responseParts = [];
             foreach ($calls as $c) {
                 $name = (string) ($c['functionCall']['name'] ?? '');
                 $args = (array) ($c['functionCall']['args'] ?? []);
                 $output = $executor->execute($name, $args);
                 $decoded = json_decode($output, true);
+                // response juga harus OBJECT (Struct), bukan list/empty-array.
+                $response = (is_array($decoded) && $decoded !== []) ? $decoded : ['result' => $output];
                 $responseParts[] = [
-                    'functionResponse' => [
-                        'name' => $name,
-                        'response' => is_array($decoded) ? $decoded : ['result' => $output],
-                    ],
+                    'functionResponse' => ['name' => $name, 'response' => $response],
                 ];
             }
             $contents[] = ['role' => 'user', 'parts' => $responseParts];
@@ -103,6 +104,18 @@ final class GeminiClient implements LlmClient, ToolRunner
             $decls[] = $decl;
         }
         return $decls;
+    }
+
+    /** Pastikan functionCall.args berupa object {} (bukan list []) saat di-echo balik. */
+    public static function normalizeArgs(array $part): array
+    {
+        if (isset($part['functionCall'])) {
+            $args = $part['functionCall']['args'] ?? null;
+            if (!is_array($args) || $args === []) {
+                $part['functionCall']['args'] = new \stdClass();
+            }
+        }
+        return $part;
     }
 
     private function isBlocked(array $resp): bool
