@@ -9,6 +9,8 @@ use Akapack\Bot\Handler\ClaudeToolHandler;
 use Akapack\Bot\Handler\EchoHandler;
 use Akapack\Bot\Handler\Handler;
 use Akapack\Bot\Llm\AnthropicClient;
+use Akapack\Bot\Llm\GeminiClient;
+use Akapack\Bot\Llm\LlmClient;
 use Akapack\Bot\Memory\ConversationMemory;
 use Akapack\Bot\Memory\NullMemory;
 use Akapack\Bot\Memory\SupabaseMemory;
@@ -17,6 +19,7 @@ use Akapack\Bot\Store\RedisStore;
 use Akapack\Bot\Store\Store;
 use Akapack\Bot\Supabase\SupabaseClient;
 use Akapack\Bot\Supabase\SupabaseTools;
+use Akapack\Bot\Tool\ToolRunner;
 
 /**
  * Perakitan (composition root). Membaca konfigurasi & menyusun komponen.
@@ -63,19 +66,17 @@ final class Bot
 
     /**
      * Pemilihan handler bertahap:
-     *  - Claude + Supabase terisi → ClaudeToolHandler (Fase 2/3, tools + memori)
-     *  - Claude saja              → ClaudeHandler (Fase 1, FAQ)
-     *  - tidak ada                → EchoHandler (Fase 0, dev)
+     *  - LLM (Gemini/Claude) + Supabase → ClaudeToolHandler (Fase 2/3, tools + memori)
+     *  - LLM saja                       → ClaudeHandler (Fase 1, FAQ)
+     *  - tidak ada LLM                  → EchoHandler (Fase 0, dev)
      */
     private function buildHandler(?SupabaseClient $db): Handler
     {
-        $claudeReady = $this->config->anthropicApiKey !== '' && class_exists(\Anthropic\Client::class);
-        if (!$claudeReady) {
-            $this->logger->warn('ANTHROPIC_API_KEY kosong / SDK absen — pakai EchoHandler (Fase 0)');
+        $llm = $this->buildLlm();
+        if ($llm === null) {
+            $this->logger->warn('Tidak ada API key LLM (GEMINI_API_KEY/ANTHROPIC_API_KEY) — EchoHandler (Fase 0)');
             return new EchoHandler($this->config->botName);
         }
-
-        $llm = new AnthropicClient($this->config->anthropicApiKey, $this->config->claudeModel);
 
         if ($db !== null) {
             $tools = new SupabaseTools($db, $this->config->tenantId, $this->config->outletBandung, $this->config->outletGarut);
@@ -88,8 +89,28 @@ final class Bot
             );
         }
 
-        $this->logger->info('Supabase belum dikonfigurasi — pakai ClaudeHandler FAQ (Fase 1)');
+        $this->logger->info('Supabase belum dikonfigurasi — handler FAQ (Fase 1)');
         return new ClaudeHandler($llm, SystemPrompt::faq($this->config->botName, $this->config->companyName), $this->memory);
+    }
+
+    /** Pilih provider LLM. Default auto: Gemini bila ada GEMINI_API_KEY, lalu Claude. */
+    private function buildLlm(): (LlmClient&ToolRunner)|null
+    {
+        $provider = $this->config->llmProvider;
+        if ($provider === '') {
+            $provider = $this->config->geminiApiKey !== '' ? 'gemini'
+                : ($this->config->anthropicApiKey !== '' ? 'claude' : '');
+        }
+
+        if ($provider === 'gemini' && $this->config->geminiApiKey !== '') {
+            $this->logger->info('LLM provider: gemini', ['model' => $this->config->geminiModel]);
+            return new GeminiClient($this->config->geminiApiKey, $this->config->geminiModel, $this->logger);
+        }
+        if ($provider === 'claude' && $this->config->anthropicApiKey !== '' && class_exists(\Anthropic\Client::class)) {
+            $this->logger->info('LLM provider: claude', ['model' => $this->config->claudeModel]);
+            return new AnthropicClient($this->config->anthropicApiKey, $this->config->claudeModel);
+        }
+        return null;
     }
 
     public function receiver(): Receiver
