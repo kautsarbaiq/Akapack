@@ -29,6 +29,12 @@ applyEnv([
     'ADMIN_WA_BANDUNG' => '628000000001',
     'RETRY_BACKOFF_SECONDS' => '30',
     'MAX_RETRY_AGE_SECONDS' => '600',
+    // Hermetik: pastikan handler = EchoHandler walau ada .env asli.
+    'LLM_PROVIDER' => '',
+    'GEMINI_API_KEY' => '',
+    'ANTHROPIC_API_KEY' => '',
+    'SUPABASE_URL' => '',
+    'SUPABASE_ANON_KEY' => '',
 ]);
 rrmdir($base . '/var/test');
 rrmdir($base . '/var/test_sig');
