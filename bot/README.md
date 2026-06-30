@@ -25,13 +25,29 @@ WhatsApp Cloud API (webhook)
 | **2** | `ClaudeToolHandler` — tools function-call Supabase (cari_produk/cek_stok/cek_harga/daftar_kategori) + guardrail cost_price | ✅ selesai |
 | **3** | Memori percakapan (sliding-window, Supabase `wa_messages`) + `eskalasi_ke_admin` per-cabang (intent+ringkasan+riwayat) | ✅ selesai |
 
-Handler dipilih otomatis di `src/Bot.php`:
-- **ClaudeToolHandler** (Fase 2) bila `ANTHROPIC_API_KEY` **dan** `SUPABASE_URL`/`SUPABASE_ANON_KEY` terisi → bot bisa jawab produk/stok/harga real-time.
-- **ClaudeHandler** (Fase 1) bila hanya Claude yang terisi → FAQ saja.
-- **EchoHandler** (Fase 0) bila tak ada kredensial → dev.
+**Otak AI** bisa **Gemini** (default) atau **Claude** — pilih via `LLM_PROVIDER`
+(`gemini`/`claude`/kosong=auto). Keduanya di belakang seam `LlmClient`/`ToolRunner`
+yang sama, jadi tools/memori/eskalasi identik.
 
-Model default `claude-sonnet-4-6` (ubah via `CLAUDE_MODEL`). Tanpa
-`temperature/top_p/budget_tokens`.
+Handler dipilih otomatis di `src/Bot.php`:
+- **ClaudeToolHandler** (Fase 2/3) bila ada API key LLM **dan** `SUPABASE_URL`/`SUPABASE_ANON_KEY` → jawab produk/stok/harga real-time + tools + eskalasi.
+- **ClaudeHandler** (Fase 1) bila hanya LLM yang terisi → FAQ saja.
+- **EchoHandler** (Fase 0) bila tak ada API key → dev.
+
+Gemini default `gemini-2.5-flash` (`GEMINI_MODEL`); Claude default `claude-sonnet-4-6`
+(`CLAUDE_MODEL`). Nama kelas masih `Claude*` tapi provider-agnostik (terima interface).
+
+### Coba cepat — chat lokal (tanpa WhatsApp/VPS)
+
+Isi `bot/.env`: `GEMINI_API_KEY` (dari https://aistudio.google.com/apikey) +
+`SUPABASE_URL`/`SUPABASE_ANON_KEY`, lalu:
+
+```bash
+php tools/chat.php
+```
+
+Ngobrol sama Mbak Aka di terminal (cek produk/stok/harga real-time). Cara tercepat
+memastikan otak bot jalan sebelum deploy.
 
 > **Guardrail cost_price (kritis):** RLS internal OFF → anon key BISA baca `cost_price`.
 > Karena itu `SupabaseClient` menolak query yang menyebut kolom modal DAN men-scrub
